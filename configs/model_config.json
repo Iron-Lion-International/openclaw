@@ -205,8 +205,8 @@
         "fallbacks": ["zai/glm-5", "deepseek/deepseek-reasoner", "openai/o3"]
       },
       "imageModel": {
-        "primary": "kimi-coding/k2p5",
-        "fallbacks": ["moonshot/kimi-k2.5", "openai/gpt-4o"]
+        "primary": "moonshot/kimi-k2.5",
+        "fallbacks": ["kimi-coding/k2p5", "openai/gpt-4o"]
       },
       "models": {
         "kimi-coding/k2p5": {
