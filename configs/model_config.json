@@ -2,8 +2,8 @@
   "$schema": "https://open-claw.bot/schemas/openclaw-models.json",
   "_comment": [
     "Model provider configuration for Brock agent stack.",
-    "Four tiers: z.ai GLM-5 (code), DeepSeek (bulk), Kimi K2 (reasoning), OpenAI (fallback).",
-    "Optional: local Ollama if hardware supports it.",
+    "Four tiers: Kimi Code (code), Kimi K2 (bulk+reasoning), DeepSeek (fallback), OpenAI (last resort).",
+    "Z.AI GLM kept as optional fallback. Local Ollama if hardware supports it.",
     "This file is a reference config — merge into your openclaw.json under 'models' and 'agents.defaults'.",
     "Full strategy rationale: see CLOUD_STRATEGY.md in the repo root."
   ],
@@ -11,7 +11,6 @@
   "models": {
     "mode": "merge",
     "providers": {
-
       "zai": {
         "baseUrl": "https://api.z.ai/api/coding/paas/v4",
         "api": "openai-completions",
@@ -72,6 +71,25 @@
             "cost": { "input": 0.28, "output": 0.42, "cacheRead": 0.028, "cacheWrite": 0.28 },
             "contextWindow": 128000,
             "maxTokens": 65536
+          }
+        ]
+      },
+
+      "kimi-coding": {
+        "baseUrl": "https://api.kimi.com/coding/",
+        "api": "anthropic-messages",
+        "auth": "api-key",
+        "apiKey": "${KIMI_API_KEY}",
+        "models": [
+          {
+            "id": "k2p5",
+            "name": "Kimi for Coding (K2.5)",
+            "reasoning": true,
+            "input": ["text", "image"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 262144,
+            "maxTokens": 32768,
+            "_comment": "Kimi Coding subscription — primary code model"
           }
         ]
       },
@@ -166,32 +184,27 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "zai/glm-5",
-        "fallbacks": [
-          "moonshot/kimi-k2-thinking",
-          "deepseek/deepseek-chat",
-          "openai/gpt-4o"
-        ]
+        "primary": "kimi-coding/k2p5",
+        "fallbacks": ["moonshot/kimi-k2-thinking", "deepseek/deepseek-chat", "openai/gpt-4o"]
       },
       "bulkModel": {
-        "primary": "deepseek/deepseek-chat",
-        "fallbacks": [
-          "moonshot/kimi-k2-thinking",
-          "openai/gpt-4o"
-        ]
+        "primary": "moonshot/kimi-k2",
+        "fallbacks": ["deepseek/deepseek-chat", "openai/gpt-4o"]
       },
       "reasoningModel": {
         "primary": "moonshot/kimi-k2-thinking",
-        "fallbacks": [
-          "zai/glm-5",
-          "openai/o3"
-        ]
+        "fallbacks": ["deepseek/deepseek-reasoner", "openai/o3"]
       },
       "imageModel": {
         "primary": "openai/gpt-4o",
         "fallbacks": ["openai/o3"]
       },
       "models": {
+        "kimi-coding/k2p5": {
+          "alias": "kc",
+          "streaming": true,
+          "params": {}
+        },
         "zai/glm-5": {
           "alias": "glm5",
           "streaming": true,
@@ -243,5 +256,5 @@
 
   "_routing_notes": "See CLOUD_STRATEGY.md for full tier descriptions, failover logic, cost analysis, and the openclaw/lobsterBucket boundary.",
 
-  "_soul_md_note": "SOUL.md was written for Claude. For local models (especially smaller ones), persona instructions may need to be more direct and repeated. If Brock drifts back to generic assistant behavior on local, try: (1) repeating key behavioral rules in the system prompt, (2) adding negative examples ('DO NOT say Great question'), (3) using shorter, more imperative phrasing. The z.ai GLM models and Kimi K2 tend to follow persona directives well."
+  "_soul_md_note": "SOUL.md was written for Claude. For local models (especially smaller ones), persona instructions may need to be more direct and repeated. If Brock drifts back to generic assistant behavior on local, try: (1) repeating key behavioral rules in the system prompt, (2) adding negative examples ('DO NOT say Great question'), (3) using shorter, more imperative phrasing. The Kimi models and z.ai GLM tend to follow persona directives well."
 }
