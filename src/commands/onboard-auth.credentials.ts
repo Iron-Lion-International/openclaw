@@ -278,6 +278,18 @@ export async function setKimiCodingApiKey(
   });
 }
 
+export async function setDeepSeekApiKey(
+  key: SecretInput,
+  agentDir?: string,
+  options?: ApiKeyStorageOptions,
+) {
+  upsertAuthProfile({
+    profileId: "deepseek:default",
+    credential: buildApiKeyCredential("deepseek", key, undefined, options),
+    agentDir: resolveAuthAgentDir(agentDir),
+  });
+}
+
 export async function setVolcengineApiKey(
   key: SecretInput,
   agentDir?: string,
@@ -328,6 +340,7 @@ export async function setVeniceApiKey(
   });
 }
 
+export const DEEPSEEK_DEFAULT_MODEL_REF = "deepseek/deepseek-chat";
 export const ZAI_DEFAULT_MODEL_REF = "zai/glm-5";
 export const XIAOMI_DEFAULT_MODEL_REF = "xiaomi/mimo-v2-flash";
 export const OPENROUTER_DEFAULT_MODEL_REF = "openrouter/auto";
