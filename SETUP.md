@@ -1,6 +1,6 @@
 # Brock — Mac Mini Setup Guide
 
-Step-by-step setup for running Brock on a Mac Mini with Kimi K2.5 (primary), z.ai GLM-5, DeepSeek, and OpenAI fallback. Optional local Ollama for offline/free-tier work.
+Step-by-step setup for running Brock on a Mac Mini. Cloud-optimized: Kimi K2.5 (primary), z.ai GLM-5, DeepSeek, and OpenAI fallback. Local Ollama is optional (see Appendix A).
 
 ## Prerequisites
 
@@ -26,58 +26,7 @@ brew install git
 
 ---
 
-## Step 2: Install Ollama (Local Model Server)
-
-```bash
-# Install Ollama
-brew install ollama
-
-# Start the Ollama service (runs on http://localhost:11434)
-brew services start ollama
-
-# Verify it's running
-curl http://localhost:11434/api/tags
-```
-
----
-
-## Step 3: Pull GLM-5 Locally
-
-GLM-5 is 744B parameters (40B active). The quantized versions are more practical for a Mac Mini:
-
-```bash
-# Check available VRAM/RAM first
-# GLM-5 full: needs ~80GB+ RAM (not practical on most Mac Minis)
-# GLM-5 Q4: needs ~25-30GB RAM (works on 32GB+ Mac Mini)
-
-# Option A: Pull a quantized GLM-5 via Ollama (if available)
-ollama pull glm-5
-
-# Option B: If GLM-5 isn't in Ollama's registry yet, use GLM-4.7 as local fast tier
-# GLM-4.7 is smaller and still strong
-ollama pull glm-4.7
-
-# Option C: If neither fits your hardware, use a smaller model for fast tier
-# and rely on z.ai API for the heavy lifting
-ollama pull qwen2.5:14b
-```
-
-**Check what fits your hardware:**
-
-| Mac Mini RAM | Recommended Local Model      | Notes                          |
-|--------------|------------------------------|--------------------------------|
-| 16GB         | qwen2.5:7b or glm-4.5-air   | Fast tier only, lean on z.ai   |
-| 32GB         | glm-4.7 (quantized)         | Good balance                   |
-| 64GB+        | glm-5 (quantized)           | Full local capability          |
-
-Verify the model works:
-```bash
-ollama run glm-4.7 "Say hello in exactly 5 words"
-```
-
----
-
-## Step 4: Get API Keys
+## Step 2: Get API Keys
 
 You need API keys for the model tiers. See `CLOUD_STRATEGY.md` for full details on the four-tier stack.
 
@@ -106,7 +55,7 @@ You need API keys for the model tiers. See `CLOUD_STRATEGY.md` for full details 
 
 ---
 
-## Step 5: Clone the Repos
+## Step 3: Clone the Repos
 
 ```bash
 # Pick a home for Brock's repos
@@ -126,7 +75,7 @@ git clone <your-lobsterBucket-url> lobsterBucket
 
 ---
 
-## Step 6: Set Up the Workspace
+## Step 4: Set Up the Workspace
 
 ```bash
 # Create openclaw's config directory
@@ -158,7 +107,7 @@ cp ~/brock/openclaw/docs/personality/brock/SOUL-SEARCH.md ~/.openclaw/workspace/
 
 ---
 
-## Step 7: Configure Environment Variables
+## Step 5: Configure Environment Variables
 
 ```bash
 # Create the env file
@@ -198,7 +147,7 @@ chmod 600 ~/.openclaw/.env
 
 ---
 
-## Step 8: Configure openclaw.json
+## Step 6: Configure openclaw.json
 
 Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the full reference with all providers and tiers is at `configs/model_config.json`.
 
@@ -308,22 +257,8 @@ Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the ful
           }
         ]
       },
-      // Optional: local Ollama (change model to match what you pulled in Step 3)
-      "local": {
-        "baseUrl": "http://localhost:11434/v1",
-        "api": "ollama",
-        "models": [
-          {
-            "id": "glm-4.7",
-            "name": "GLM-4.7 (local)",
-            "reasoning": true,
-            "input": ["text"],
-            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
-            "contextWindow": 131072,
-            "maxTokens": 8192
-          }
-        ]
-      }
+      // Optional: local Ollama — see Appendix A at the bottom of this guide
+      // "local": { ... }
     }
   },
 
@@ -349,8 +284,7 @@ Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the ful
         "moonshot/kimi-k2-thinking": { "alias": "kimi",  "streaming": true },
         "zai/glm-5":                 { "alias": "glm5",  "streaming": true },
         "deepseek/deepseek-chat":    { "alias": "ds",    "streaming": true },
-        "openai/gpt-4o":             { "alias": "gpt",   "streaming": true },
-        "local/glm-4.7":             { "alias": "local", "streaming": true }
+        "openai/gpt-4o":             { "alias": "gpt",   "streaming": true }
       }
     }
   }
@@ -361,7 +295,7 @@ Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the ful
 
 ---
 
-## Step 9: First Run (Bootstrap)
+## Step 7: First Run (Bootstrap)
 
 ```bash
 cd ~/brock/openclaw
@@ -393,12 +327,9 @@ pnpm openclaw gateway run
 
 ---
 
-## Step 10: Verify Everything Works
+## Step 8: Verify Everything Works
 
 ```bash
-# Check Ollama is serving
-curl -s http://localhost:11434/api/tags | python3 -m json.tool
-
 # Check openclaw gateway is up
 curl -s http://localhost:3000/health   # adjust port if different
 
@@ -789,3 +720,61 @@ curl https://api.z.ai/api/coding/paas/v4/models \
 - Local models need more reinforcement than cloud APIs
 - Make SOUL.md more direct: repeat key rules, add negative examples
 - Consider using z.ai as primary and local only for simple tasks
+
+---
+
+## Appendix A: Local Ollama (Optional)
+
+Only needed if you want a free offline model for light tasks. All cloud tiers work without this.
+
+```bash
+# Install Ollama
+brew install ollama
+
+# Start the service
+brew services start ollama
+
+# Verify
+curl http://localhost:11434/api/tags
+```
+
+Pull a model based on your Mac Mini's RAM:
+
+| Mac Mini RAM | Recommended Model | Notes |
+|--------------|-------------------|-------|
+| 16GB | qwen2.5:7b or glm-4.5-air | Light tasks only |
+| 32GB | glm-4.7 (quantized) | Good for fast-tier work |
+| 64GB+ | glm-5 (quantized) | Full local capability |
+
+```bash
+# Example: pull GLM-4.7
+ollama pull glm-4.7
+
+# Verify
+ollama run glm-4.7 "Say hello in exactly 5 words"
+```
+
+Then add the local provider to `~/.openclaw/openclaw.json` under `models.providers`:
+
+```json5
+"local": {
+  "baseUrl": "http://localhost:11434/v1",
+  "api": "ollama",
+  "models": [
+    {
+      "id": "glm-4.7",
+      "name": "GLM-4.7 (local)",
+      "reasoning": true,
+      "input": ["text"],
+      "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+      "contextWindow": 131072,
+      "maxTokens": 8192
+    }
+  ]
+}
+```
+
+And add the alias under `agents.defaults.models`:
+```json5
+"local/glm-4.7": { "alias": "local", "streaming": true }
+```
