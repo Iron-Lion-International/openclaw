@@ -1,0 +1,315 @@
+{
+  "_comment": [
+    "Complete deployable openclaw.json for Brock agent stack.",
+    "Copy to ~/.openclaw/openclaw.json on the Mac Mini.",
+    "Requires env vars in ~/.openclaw/.env — see SETUP.md Step 5.",
+    "Full strategy rationale: CLOUD_STRATEGY.md · Per-file references: model_config.json, discord_brock.json"
+  ],
+
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "kimi-coding": {
+        "baseUrl": "https://api.kimi.com/coding/",
+        "api": "anthropic-messages",
+        "auth": "api-key",
+        "apiKey": "${KIMI_API_KEY}",
+        "models": [
+          {
+            "id": "k2p5",
+            "name": "Kimi for Coding (K2.5)",
+            "reasoning": true,
+            "input": ["text", "image"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 262144,
+            "maxTokens": 32768
+          }
+        ]
+      },
+
+      "moonshot": {
+        "baseUrl": "https://api.moonshot.ai/v1",
+        "api": "openai-completions",
+        "auth": "api-key",
+        "apiKey": "${MOONSHOT_API_KEY}",
+        "models": [
+          {
+            "id": "kimi-k2-thinking",
+            "name": "Kimi K2 Thinking (reasoning)",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 0.6, "output": 2.5, "cacheRead": 0.15, "cacheWrite": 0.6 },
+            "contextWindow": 256000,
+            "maxTokens": 65536
+          },
+          {
+            "id": "kimi-k2-thinking-turbo",
+            "name": "Kimi K2 Thinking Turbo (fast reasoning)",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 1.15, "output": 8.0, "cacheRead": 0.29, "cacheWrite": 1.15 },
+            "contextWindow": 256000,
+            "maxTokens": 65536
+          },
+          {
+            "id": "kimi-k2",
+            "name": "Kimi K2 Base (fast, non-thinking)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": { "input": 0.6, "output": 2.5, "cacheRead": 0.15, "cacheWrite": 0.6 },
+            "contextWindow": 256000,
+            "maxTokens": 32768
+          },
+          {
+            "id": "kimi-k2.5",
+            "name": "Kimi K2.5 (multimodal)",
+            "reasoning": false,
+            "input": ["text", "image"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 256000,
+            "maxTokens": 8192
+          }
+        ]
+      },
+
+      "zai": {
+        "baseUrl": "https://api.z.ai/api/coding/paas/v4",
+        "api": "openai-completions",
+        "auth": "api-key",
+        "apiKey": "${ZAI_API_KEY}",
+        "models": [
+          {
+            "id": "glm-5",
+            "name": "GLM-5 (z.ai Coding)",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 1.0, "output": 3.2, "cacheRead": 0.2, "cacheWrite": 1.0 },
+            "contextWindow": 200000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "glm-4.7",
+            "name": "GLM-4.7 (z.ai Coding)",
+            "reasoning": true,
+            "input": ["text", "image"],
+            "cost": { "input": 0.6, "output": 2.2, "cacheRead": 0.11, "cacheWrite": 0.6 },
+            "contextWindow": 203000,
+            "maxTokens": 16384
+          },
+          {
+            "id": "glm-4.7-flash",
+            "name": "GLM-4.7 Flash (z.ai, free)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 203000,
+            "maxTokens": 16384
+          }
+        ]
+      },
+
+      "deepseek": {
+        "baseUrl": "https://api.deepseek.com/v1",
+        "api": "openai-completions",
+        "auth": "api-key",
+        "apiKey": "${DEEPSEEK_API_KEY}",
+        "models": [
+          {
+            "id": "deepseek-chat",
+            "name": "DeepSeek V3.2 Chat (bulk)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": { "input": 0.28, "output": 0.42, "cacheRead": 0.028, "cacheWrite": 0.28 },
+            "contextWindow": 128000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "DeepSeek V3.2 Reasoner (thinking)",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 0.28, "output": 0.42, "cacheRead": 0.028, "cacheWrite": 0.28 },
+            "contextWindow": 128000,
+            "maxTokens": 65536
+          }
+        ]
+      },
+
+      "openai": {
+        "baseUrl": "https://api.openai.com/v1",
+        "api": "openai-completions",
+        "auth": "api-key",
+        "apiKey": "${OPENAI_API_KEY}",
+        "models": [
+          {
+            "id": "gpt-4o",
+            "name": "GPT-4o (OpenAI fallback)",
+            "reasoning": false,
+            "input": ["text", "image"],
+            "cost": { "input": 2.5, "output": 10.0, "cacheRead": 1.25, "cacheWrite": 2.5 },
+            "contextWindow": 128000,
+            "maxTokens": 16384
+          },
+          {
+            "id": "o3",
+            "name": "o3 (OpenAI reasoning fallback)",
+            "reasoning": true,
+            "input": ["text", "image"],
+            "cost": { "input": 10.0, "output": 40.0, "cacheRead": 5.0, "cacheWrite": 10.0 },
+            "contextWindow": 200000,
+            "maxTokens": 100000
+          }
+        ]
+      }
+    }
+  },
+
+  "gateway": {
+    "mode": "local",
+    "port": 18789,
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    }
+  },
+
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "token": "${DISCORD_BOT_TOKEN}",
+
+      "dmPolicy": "disabled",
+      "allowBots": false,
+      "groupPolicy": "allowlist",
+
+      "replyToMode": "all",
+      "textChunkLimit": 1800,
+      "streaming": "partial",
+      "maxLinesPerMessage": 25,
+
+      "commands": {
+        "native": false,
+        "nativeSkills": false
+      },
+
+      "actions": {
+        "reactions": true,
+        "threads": true,
+        "messages": true,
+        "pins": false,
+        "search": true,
+        "memberInfo": true,
+        "roleInfo": true,
+        "roles": false,
+        "channelInfo": true,
+        "moderation": false,
+        "emojiUploads": false,
+        "stickerUploads": false,
+        "channels": false,
+        "presence": true,
+        "events": false,
+        "voiceStatus": false,
+        "stickers": false,
+        "polls": false,
+        "permissions": false
+      },
+
+      "activity": "waking up...",
+      "activityType": 4,
+      "status": "online",
+
+      "guilds": {
+        "${DISCORD_GUILD_ID}": {
+          "slug": "brock-server",
+          "requireMention": false,
+          "roles": ["Operator", "Admin"],
+          "reactionNotifications": "own",
+
+          "channels": {
+            "brock-alerts": {
+              "allow": true,
+              "enabled": true,
+              "requireMention": false,
+              "roles": ["Operator", "Admin"],
+              "systemPrompt": "This is the alerts channel. Only post critical/urgent issues here: escalations, system failures, security alerts, exceptional job matches."
+            },
+            "brock-dev": {
+              "allow": true,
+              "enabled": true,
+              "requireMention": false,
+              "roles": ["Operator", "Admin"],
+              "systemPrompt": "This is the dev channel. Post development activity here: PRs opened, reviews, build/deploy status, config changes."
+            },
+            "brock-content": {
+              "allow": true,
+              "enabled": true,
+              "requireMention": false,
+              "roles": ["Operator", "Admin"],
+              "systemPrompt": "This is the content channel. Post content and research here: generated content, research summaries, backlog updates."
+            },
+            "brock-daily": {
+              "allow": true,
+              "enabled": true,
+              "requireMention": false,
+              "roles": ["Operator", "Admin"],
+              "systemPrompt": "This is the daily operations channel. Post operational cadence here: morning briefings, EOD summaries, weekly reports, metrics."
+            }
+          }
+        }
+      },
+
+      "dm": {
+        "enabled": false,
+        "policy": "disabled"
+      },
+
+      "execApprovals": {
+        "enabled": true,
+        "target": "channel",
+        "approvers": ["${DISCORD_AUTHORIZED_USERS}"]
+      },
+
+      "retry": {
+        "maxRetries": 3,
+        "retryDelayMs": 2000
+      }
+    }
+  },
+
+  "agents": {
+    "defaults": {
+      "workspace": "~/.openclaw/workspace",
+      "model": {
+        "primary": "kimi-coding/k2p5",
+        "fallbacks": ["zai/glm-5", "deepseek/deepseek-chat", "openai/gpt-4o"]
+      },
+      "bulkModel": {
+        "primary": "moonshot/kimi-k2.5",
+        "fallbacks": ["zai/glm-4.7-flash", "deepseek/deepseek-chat", "openai/gpt-4o"]
+      },
+      "reasoningModel": {
+        "primary": "moonshot/kimi-k2.5",
+        "fallbacks": ["zai/glm-5", "deepseek/deepseek-reasoner", "openai/o3"]
+      },
+      "imageModel": {
+        "primary": "moonshot/kimi-k2.5",
+        "fallbacks": ["kimi-coding/k2p5", "openai/gpt-4o"]
+      },
+      "models": {
+        "kimi-coding/k2p5":              { "alias": "kc",         "streaming": true },
+        "zai/glm-5":                     { "alias": "glm5",       "streaming": true },
+        "zai/glm-4.7":                   { "alias": "glm47",      "streaming": true },
+        "zai/glm-4.7-flash":             { "alias": "glm-flash",  "streaming": true },
+        "deepseek/deepseek-chat":        { "alias": "ds",         "streaming": true },
+        "deepseek/deepseek-reasoner":    { "alias": "dsr",        "streaming": true },
+        "moonshot/kimi-k2-thinking":     { "alias": "kimi",       "streaming": true },
+        "moonshot/kimi-k2-thinking-turbo": { "alias": "kimi-turbo", "streaming": true },
+        "moonshot/kimi-k2":              { "alias": "kimi-base",  "streaming": true },
+        "moonshot/kimi-k2.5":            { "alias": "kimi-v",     "streaming": true },
+        "openai/gpt-4o":                 { "alias": "gpt",        "streaming": true },
+        "openai/o3":                     { "alias": "o3",         "streaming": true }
+      }
+    }
+  }
+}

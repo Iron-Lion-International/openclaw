@@ -149,7 +149,20 @@ chmod 600 ~/.openclaw/.env
 
 ## Step 6: Configure openclaw.json
 
-Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the full reference with all providers and tiers is at `configs/model_config.json`.
+Deploy `configs/openclaw.json` to `~/.openclaw/openclaw.json`. This is the complete, ready-to-use config with all model providers, fallback chains, Discord channel config, and gateway settings. All secrets are referenced via `${ENV_VAR}` from your `.env` file (Step 5).
+
+```bash
+cp configs/openclaw.json ~/.openclaw/openclaw.json
+```
+
+The individual reference files are also available if you want to customize:
+- `configs/model_config.json` — all providers, models, agent defaults, and routing notes
+- `configs/discord_brock.json` — full Discord channel config with per-channel system prompts
+
+<details>
+<summary>Full config contents (click to expand)</summary>
+
+This is a minimal starter config — the full reference with all providers and tiers is at `configs/model_config.json`.
 
 ```json5
 {
@@ -315,17 +328,11 @@ Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the ful
 
 > **Tip:** The full reference config at `configs/model_config.json` has all providers, all models (including turbo/reasoner variants), and routing notes. Copy sections from there as needed. See `CLOUD_STRATEGY.md` for tier rationale and cost analysis.
 
+</details>
+
 ### Discord Channel Setup
 
-The minimal `channels.discord` block above just enables the channel. For a full Brock-specific Discord config with guild allowlisting, per-channel system prompts, exec approvals, and webhook integration, merge `configs/discord_brock.json` into your config:
-
-```bash
-# Review the reference config
-cat configs/discord_brock.json
-
-# Then copy the "channels" block into your openclaw.json,
-# replacing the minimal starter above.
-```
+The `configs/openclaw.json` already includes the full Discord config (from `configs/discord_brock.json`) with guild allowlisting, per-channel system prompts, exec approvals, and streaming.
 
 Required env vars (already in your `.env` from Step 5):
 - `DISCORD_BOT_TOKEN` — bot token from the Discord Developer Portal
