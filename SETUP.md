@@ -262,6 +262,28 @@ Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the ful
     }
   },
 
+  // ── Gateway ─────────────────────────────────────────────────
+  "gateway": {
+    "mode": "local",
+    "port": 18789,
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    }
+  },
+
+  // ── Channels ──────────────────────────────────────────────
+  // Discord: full reference config at configs/discord_brock.json
+  // Merge that file's "channels" block here once your Discord bot is ready.
+  // Minimal starter (just enables the channel — customize guild/channels later):
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "token": "${DISCORD_BOT_TOKEN}"
+    }
+  },
+
   // ── Agent Defaults ───────────────────────────────────────────
   "agents": {
     "defaults": {
@@ -292,6 +314,31 @@ Create `~/.openclaw/openclaw.json`. This is a minimal starter config — the ful
 ```
 
 > **Tip:** The full reference config at `configs/model_config.json` has all providers, all models (including turbo/reasoner variants), and routing notes. Copy sections from there as needed. See `CLOUD_STRATEGY.md` for tier rationale and cost analysis.
+
+### Discord Channel Setup
+
+The minimal `channels.discord` block above just enables the channel. For a full Brock-specific Discord config with guild allowlisting, per-channel system prompts, exec approvals, and webhook integration, merge `configs/discord_brock.json` into your config:
+
+```bash
+# Review the reference config
+cat configs/discord_brock.json
+
+# Then copy the "channels" block into your openclaw.json,
+# replacing the minimal starter above.
+```
+
+Required env vars (already in your `.env` from Step 5):
+- `DISCORD_BOT_TOKEN` — bot token from the Discord Developer Portal
+- `DISCORD_APPLICATION_ID` — application ID
+- `DISCORD_GUILD_ID` — your server ID (right-click server → Copy Server ID)
+- `DISCORD_AUTHORIZED_USERS` — comma-separated user IDs for exec approvals
+
+You can also enable Discord after initial setup:
+
+```bash
+openclaw config set channels.discord.enabled true --json
+openclaw config set channels.discord.token '${DISCORD_BOT_TOKEN}' --json
+```
 
 ---
 
